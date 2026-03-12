@@ -21,6 +21,27 @@ class Library {
     }
   }
 
+  searchUser(userId) {
+    const user = this.users.find((u) => u.id === userId);
+    return user;
+  }
+
+  searchItem(Items, KeyId) {
+    let left = 0;
+    let right = Items.length-1;
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      if (Items[mid].id === KeyId) {
+        return Items[mid];
+      } else if (Items[mid].id < KeyId) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+    return console.log("not search number");
+  }
+
   returnItem(userId, itemId) {
     const user = this.users.find((u) => u.id === userId);
     const item = this.items.find((i) => i.id === itemId);
@@ -56,9 +77,9 @@ class Library {
       (item) => item.status === "Checkout",
     ).length;
 
-    console.log(`Total Items: ${this.items.length}`);
-    console.log(`Available Items: ${availableCount}`);
-    console.log(`Checked Out Items: ${checkoutCount}`);
+    // console.log(`Total Items: ${this.items.length}`);
+    // console.log(`Available Items: ${availableCount}`);
+    // console.log(`Checked Out Items: ${checkoutCount}`);
   }
 }
 

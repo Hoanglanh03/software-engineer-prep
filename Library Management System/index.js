@@ -1,22 +1,39 @@
 const Library = require("./Library");
-const { Book, DVD } = require("./BookAndDVD");  
+const { Book, DVD } = require("./BookAndDVD");
 const User = require("./User");
 
 const library = new Library();
 
-const book1 = new Book(1, "Harry Potter", "J.K. Rowling", "Book");
-const dvd1 = new DVD(2, "Avengers", "Joss Whedon", "DVD");
-const dvd3 = new DVD(3, "Iron Man", "Jon Favreau", "DVD");
+const books = Array.from(
+  { length: 300 },
+  (_, i) => new Book(i + 1, `Book ${i + 1}`, `Author ${i + 1}`, "Book"),
+);
 
-library.addItem(book1);
-library.addItem(dvd1);
-library.addItem(dvd3);
+const dvds = Array.from(
+  { length: 300 },
+  (_, i) => new DVD(i + 301, `DVD ${i + 1}`, `Director ${i + 1}`, "DVD"),
+);
 
-const user1 = new User(1, "John");
-const user2 = new User(2, "Lanh");
-library.addUser(user1);
-library.addUser(user2);
+books.forEach((b) => library.addItem(b));
+dvds.forEach((d) => library.addItem(d));
+
+const users = Array.from(
+  { length: 1000000 },
+  (_, i) => new User(i + 1, `User ${i + 1}`),
+);
+users.forEach((u) => library.addUser(u));
 
 library.borrowItemForUser(1, 2);
 library.returnItem(1, 1);
-library.listItems();
+
+console.time("Binary Search Item");
+console.log("Result Binary Item:", library.searchItem(library.users, 999));
+console.timeEnd("Binary Search Item");
+
+console.time("Linear Search Item");
+for (let i = 0; i < 100000; i++) {
+  library.searchUser(999);
+}
+console.timeEnd("Linear Search Item");
+
+// library.listItems();
