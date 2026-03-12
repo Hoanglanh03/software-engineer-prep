@@ -35,6 +35,33 @@
       "category": "Linh kiện",
       "date": "2026-03-11",
       "note": "Monthly salary"
+    },
+    {
+      "id": 1773312026173,
+      "title": "Mua chuột máy tính",
+      "amount": 500000,
+      "type": "income",
+      "category": "Linh kiện",
+      "date": "2026-03-11",
+      "note": "Monthly salary"
+    },
+    {
+      "id": 1773315880115,
+      "title": "Ăn bún bò huế",
+      "amount": 50000222,
+      "type": "expense",
+      "category": "Food",
+      "date": "2026-03-12",
+      "note": "Phở bò ngon"
+    },
+    {
+      "id": 1773330700364,
+      "title": "Ăn trưa 11",
+      "amount": 50000,
+      "type": "expense",
+      "category": "Food",
+      "date": "2026-03-12",
+      "note": "Phở bò ngon"
     }
   ]
 }
