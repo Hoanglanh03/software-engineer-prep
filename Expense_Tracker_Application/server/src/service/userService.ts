@@ -61,6 +61,8 @@ const createUser = async (newData: createUserDTO): Promise<User> => {
   const newUser: User = {
     id: uuidString,
     ...newData,
+    role: 'user', // default role
+    updatedAt: new Date(),
   };
 
   data.users.push(newUser);
