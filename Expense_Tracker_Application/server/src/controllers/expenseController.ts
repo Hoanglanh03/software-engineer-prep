@@ -3,8 +3,9 @@ import expenseModel from "../service/expenseService";
 
 const createExpense = async (req: Request, res: Response) => {
   try {
-    const { title, amount, type, category, date, note } = req.body;
-    if (!title || !amount || !type || !category || !date) {
+    const userId = (req as any).user?.id;
+    const { title, amount, type, category, note } = req.body;
+    if (!title || !amount || !type || !category) {
       return res.status(400).json({ error: "Missing required fields" });
     }
     const newExpense = await expenseModel.createExpense({
@@ -12,11 +13,12 @@ const createExpense = async (req: Request, res: Response) => {
       amount,
       type,
       category,
-      date,
       note,
+      userId,
     });
     return res.status(201).json(newExpense);
   } catch (error) {
+    console.log("object", error);
     return res.status(500).json({ error: (error as Error).message });
   }
 };

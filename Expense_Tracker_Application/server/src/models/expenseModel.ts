@@ -1,11 +1,13 @@
 export interface Expense {
-  id: string;
+  id: number | string;
   title: string;
   amount: number;
   type: string;
   category: string;
-  date: Date;
   note: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  userId: string | number;
 }
 
 export interface createExpenseDTO {
@@ -13,6 +15,6 @@ export interface createExpenseDTO {
   amount: number;
   type: string;
   category: string;
-  date: Date;
   note: string;
+  userId: string | number;
 }

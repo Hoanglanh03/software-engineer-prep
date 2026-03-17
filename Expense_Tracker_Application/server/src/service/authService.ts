@@ -1,55 +1,66 @@
-import { v4 as uuidv4 } from "uuid";
-import bcrypt from "bcrypt";
-import dbHelper from "../models/db.helper";
-import { User, createUserDTO, loginUserDTO } from "../models/userModel";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+
+
+import { User, createUserDTO, loginUserDTO } from "../models/userModel";
+
 import dotenv from "dotenv";
-import { generateToken } from "../utils/jwt";
+import pool from "../setups/database";
+
+
+
 dotenv.config();
+
+//==================================================
+//register
+//==================================================
+
+export const register = async (dataSignUp: createUserDTO): Promise<User> => {
+  const checkQuery = "SELECT * FROM users WHERE LOWER(email) = LOWER($1)";
+  const existingUserRes = await pool.query(checkQuery, [dataSignUp.email]);
+
+  if (existingUserRes.rows.length > 0) {
+    throw { message: "User already exists", statusCode: 400 };
+  }
+
+  const hashedPassword = await bcrypt.hash(dataSignUp.password, 10);
+
+  const insertQuery = `
+    INSERT INTO users (user_name, email, password)
+    VALUES ($1, $2, $3)
+    RETURNING id, user_name, email, role, created_at, updated_at;
+  `;
+
+  const values = [
+    dataSignUp.userName,
+    dataSignUp.email.toLowerCase(),
+    hashedPassword,
+  ];
+
+  const result = await pool.query(insertQuery, values);
+  const row = result.rows[0];
+
+  const newUser: User = {
+    userId: row.userId,
+    userName: row.user_name,
+    email: row.email,
+    role: row.role,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+
+  return newUser;
+};
 
 //==================================================
 //login a User
 //==================================================
 
-export const register = async (dataSignUp: createUserDTO): Promise<User> => {
-  const data = await dbHelper.readData();
-
-  const existingUser = data.users.find(
-    (u: User) =>
-      u.email.toLocaleLowerCase() === dataSignUp.email.toLocaleLowerCase(),
-  );
-
-  if (existingUser) {
-    throw {
-      message: "User already exists",
-      statusCode: 400,
-    };
-  }
-
-  const hashedPassword = await bcrypt.hash(dataSignUp.password, 10);
-
-  const newUser: User = {
-    id: uuidv4(),
-    ...dataSignUp,
-    password: hashedPassword,
-    role: "customer",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  data.users.push(newUser);
-  await dbHelper.writeData(data);
-
-  return newUser;
-};
-
 export const login = async (dataSignIn: loginUserDTO) => {
-  const data = await dbHelper.readData();
+  const query = "SELECT * FROM users WHERE LOWER(email) = LOWER($1)";
+  const result = await pool.query(query, [dataSignIn.email]);
 
-  const existingUser = data.users.find(
-    (u: User) =>
-      u.email.toLocaleLowerCase() === dataSignIn.email.toLocaleLowerCase(),
-  );
+  const existingUser = result.rows[0];
 
   if (!existingUser) {
     throw new Error("Invalid credentials");
