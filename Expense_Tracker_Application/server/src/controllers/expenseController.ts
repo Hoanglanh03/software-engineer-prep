@@ -41,7 +41,7 @@ const getExpenses = async (req: Request, res: Response) => {
 const getExpenseById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const data = await expenseModel.getExpenseById(String(id));
+    const data = await expenseModel.getExpenseById(Number(id));
     if (!data) {
       return res.status(404).json({ error: "Expense not found" });
     }
@@ -55,7 +55,7 @@ const updateExpense = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updatedExpense = await expenseModel.updateExpense(
-      String(id),
+      Number(id),
       req.body,
     );
     if (!updatedExpense) {
@@ -70,7 +70,7 @@ const updateExpense = async (req: Request, res: Response) => {
 const deleteExpense = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const deleted = await expenseModel.deleteExpense(String(id));
+    const deleted = await expenseModel.deleteExpense(Number(id));
     if (!deleted) {
       return res.status(404).json({ error: "Expense not found" });
     }

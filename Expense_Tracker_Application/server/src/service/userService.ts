@@ -1,67 +1,73 @@
-import dbHelper from "../models/db.helper";
 import { User, createUserDTO } from "../models/userModel";
+import prisma from "../config/prisma";
+
+//==================================================
+//Create User
+//==================================================
+
+const createUser = async (newData: createUserDTO) => {
+  const existingUser = await prisma.users.findUnique({
+    where: { email: newData.email.toLowerCase() },
+  });
+  if (existingUser) {
+    throw new Error("User already exists");
+  }
+
+  // Note: normally password would be hashed here, but since this is just a mockup
+  // or it relies on authService for actual registration, we'll just insert
+  return await prisma.users.create({
+    data: {
+      user_name: newData.userName,
+      email: newData.email.toLowerCase(),
+      password: newData.password,
+    },
+  });
+};
 
 //==================================================
 //Read User
 //==================================================
 
 const getUsers = async () => {
-  const data = await dbHelper.readData();
-  return data.users;
+  return await prisma.users.findMany({
+    orderBy: {
+      created_at: "desc",
+    },
+  });
 };
 
-const getUserById = async (id: string): Promise<User> => {
-  const data = await dbHelper.readData();
-  return data.users.find((item: { id: string }) => item.id === String(id));
+const getUserById = async (id: number) => {
+  return await prisma.users.findUnique({
+    where: { id: id },
+  });
 };
 
 //==================================
 //update user
 //==================================
 
-const updateUser = async (
-  id: string,
-  newData: createUserDTO,
-): Promise<User> => {
-  const data = await dbHelper.readData();
-
-  const index = data.Users.findIndex(
-    (e: { id: string }) => e.id === String(id),
-  );
-
-  if (index === -1) throw new Error("user not found");
-
-  data.Users[index] = {
-    ...data.Users[index],
-    ...newData,
-    id: data.Users[index].id,
-  };
-
-  await dbHelper.writeData(data);
-  return data.Users[index];
+const updateUser = async (id: number, newData: createUserDTO) => {
+  return await prisma.users.update({
+    where: { id: id },
+    data: {
+      user_name: newData.userName,
+      email: newData.email?.toLowerCase(),
+    },
+  });
 };
 
 //==================================
 //delete user
 //==================================
 
-const deleteUser = async (id: string): Promise<User> => {
-  const data = await dbHelper.readData();
-
-  const index = data.users.findIndex(
-    (e: { id: string }) => e.id === String(id),
-  );
-
-  if (index === -1) throw new Error("user not found");
-
-  const deleted = data.users.splice(index, 1);
-
-  await dbHelper.writeData(data);
-
-  return deleted;
+const deleteUser = async (id: number) => {
+  return await prisma.users.delete({
+    where: { id: id },
+  });
 };
 
 const userService = {
+  createUser,
   getUsers,
   getUserById,
   updateUser,

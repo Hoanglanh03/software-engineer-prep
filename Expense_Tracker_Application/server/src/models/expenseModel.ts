@@ -7,7 +7,7 @@ export interface Expense {
   note: string;
   createdAt?: Date;
   updatedAt?: Date;
-  userId: string | number;
+  userId: number;
 }
 
 export interface createExpenseDTO {
@@ -16,5 +16,5 @@ export interface createExpenseDTO {
   type: string;
   category: string;
   note: string;
-  userId: string | number;
+  userId: number;
 }

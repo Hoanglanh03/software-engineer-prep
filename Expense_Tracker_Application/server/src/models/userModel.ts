@@ -2,9 +2,9 @@ export interface User {
   userId: string | number;
   userName: string;
   email: string;
-  role: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  role: string | null;
+  createdAt?: Date | null;
+  updatedAt?: Date | null;
 }
 
 export interface createUserDTO {

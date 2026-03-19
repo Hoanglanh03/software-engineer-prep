@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import { register, login } from "../service/authService";
 
-import { ZodError } from "zod";
 import { signInSchema, signUpSchema } from "../validation/auth.schema";
 
 export const signUp = async (req: Request, res: Response) => {
   const validation = signUpSchema.safeParse(req.body);
+
+  console.log(req.body);
+  console.log(validation.data);
 
   if (!validation.success) {
     return res.status(400).json({

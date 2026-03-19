@@ -1,13 +1,10 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-
 import { User, createUserDTO, loginUserDTO } from "../models/userModel";
 
 import dotenv from "dotenv";
-import pool from "../setups/database";
-
-
+import prisma from "../config/prisma";
 
 dotenv.config();
 
@@ -16,40 +13,44 @@ dotenv.config();
 //==================================================
 
 export const register = async (dataSignUp: createUserDTO): Promise<User> => {
-  const checkQuery = "SELECT * FROM users WHERE LOWER(email) = LOWER($1)";
-  const existingUserRes = await pool.query(checkQuery, [dataSignUp.email]);
+  if (!dataSignUp.email) {
+    throw new Error("Email is required");
+  }
 
-  if (existingUserRes.rows.length > 0) {
-    throw { message: "User already exists", statusCode: 400 };
+  const existingUser = await prisma.users.findUnique({
+    where: {
+      email: String(dataSignUp.email).toLowerCase().trim(),
+    },
+  });
+
+  console.log("email12313123:", existingUser);
+
+  if (existingUser) {
+    const error: any = new Error("User already exists");
+    error.statusCode = 400;
+    throw error;
   }
 
   const hashedPassword = await bcrypt.hash(dataSignUp.password, 10);
 
-  const insertQuery = `
-    INSERT INTO users (user_name, email, password)
-    VALUES ($1, $2, $3)
-    RETURNING id, user_name, email, role, created_at, updated_at;
-  `;
+  const newUser = await prisma.users.create({
+    data: {
+      user_name: dataSignUp.userName,
+      email: dataSignUp.email,
+      password: hashedPassword,
+      // role mặc định sẽ lấy từ database nếu bạn đã set @default("user")
+    },
+  });
 
-  const values = [
-    dataSignUp.userName,
-    dataSignUp.email.toLowerCase(),
-    hashedPassword,
-  ];
-
-  const result = await pool.query(insertQuery, values);
-  const row = result.rows[0];
-
-  const newUser: User = {
-    userId: row.userId,
-    userName: row.user_name,
-    email: row.email,
-    role: row.role,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+  // Chuyển đổi từ kiểu của Prisma sang kiểu User của bạn
+  return {
+    userId: newUser.id,
+    userName: newUser.user_name,
+    email: newUser.email,
+    role: newUser.role,
+    createdAt: newUser.created_at,
+    updatedAt: newUser.updated_at,
   };
-
-  return newUser;
 };
 
 //==================================================
@@ -57,21 +58,22 @@ export const register = async (dataSignUp: createUserDTO): Promise<User> => {
 //==================================================
 
 export const login = async (dataSignIn: loginUserDTO) => {
-  const query = "SELECT * FROM users WHERE LOWER(email) = LOWER($1)";
-  const result = await pool.query(query, [dataSignIn.email]);
-
-  const existingUser = result.rows[0];
+  const existingUser = await prisma.users.findUnique({
+    where: {
+      email: dataSignIn.email,
+    },
+  });
 
   if (!existingUser) {
-    throw new Error("Invalid credentials");
+    const error: any = new Error("Invalid credentials");
+    error.statusCode = 401;
+    throw error;
   }
 
   const isMatchPassword = await bcrypt.compare(
     dataSignIn.password,
     existingUser.password,
   );
-
-  console.log("isMatchPassword", isMatchPassword);
 
   if (!isMatchPassword) {
     throw new Error("Invalid credentials");
@@ -88,7 +90,14 @@ export const login = async (dataSignIn: loginUserDTO) => {
       expiresIn: "1h",
     },
   );
-  console.log("token", token);
 
-  return token;
+  return {
+    token,
+    user: {
+      id: existingUser.id,
+      userName: existingUser.user_name,
+      email: existingUser.email,
+      role: existingUser.role,
+    },
+  };
 };

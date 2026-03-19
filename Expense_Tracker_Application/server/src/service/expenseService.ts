@@ -1,41 +1,21 @@
 import { createExpenseDTO, Expense } from "../models/expenseModel";
-import pool from "../setups/database";
+import prisma from "../config/prisma";
 
 //==================================
 //Create expense
 //==================================
 
-const createExpense = async (newData: createExpenseDTO): Promise<Expense> => {
-  const query = `
-    INSERT INTO expenses (title, amount, type, category, note, user_id) 
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING *;`;
-
-  const values = [
-    newData.title,
-    newData.amount,
-    newData.type,
-    newData.category,
-    newData.note,
-    newData.userId,
-  ];
-
-  const result = await pool.query(query, values);
-  const row = result.rows[0];
-
-  const newExpense: Expense = {
-    id: row.id,
-    title: row.title,
-    amount: row.amount,
-    type: row.type,
-    category: row.category,
-    note: row.note,
-    userId: row.user_id,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-
-  return newExpense;
+const createExpense = async (newData: createExpenseDTO) => {
+  return await prisma.expenses.create({
+    data: {
+      title: newData.title,
+      amount: newData.amount,
+      type: newData.type,
+      category: newData.category,
+      note: newData.note,
+      user_id: newData.userId,
+    },
+  });
 };
 
 //==================================
@@ -43,53 +23,50 @@ const createExpense = async (newData: createExpenseDTO): Promise<Expense> => {
 //==================================
 
 const getAllExpense = async () => {
-  const query = "SELECT * FROM expenses ORDER BY created_at DESC";
-  const result = await pool.query(query);
-  return result.rows;
+  return await prisma.expenses.findMany({
+    include: {
+      users: true, // Nếu bạn muốn lấy luôn thông tin người tạo (JOIN)
+    },
+    orderBy: {
+      created_at: "desc",
+    },
+  });
 };
 
-const getExpenseById = async (id: string): Promise<Expense | undefined> => {
-  const query = "SELECT * FROM expenses WHERE id = $1";
-  const result = await pool.query(query, [id]);
-  return result.rows[0];
+const getExpenseById = async (id: number) => {
+  return await prisma.expenses.findUnique({
+    where: { id: id },
+    include: {
+      users: true, // Nếu bạn muốn lấy luôn thông tin người tạo (JOIN)
+    },
+  });
 };
 
 //==================================
 //update expense
 //==================================
 
-const updateExpense = async (
-  id: string,
-  newData: createExpenseDTO,
-): Promise<Expense> => {
-  const query = `UPDATE expenses SET title = $1 , amount = $2, category = $3, note = $4 WHERE id = $5 RETURNING *;`;
-
-  const values = [
-    newData.title,
-    newData.amount,
-    newData.category,
-    newData.note,
-    id,
-  ];
-
-  const result = await pool.query(query, values);
-
-  if (result.rowCount === 0) throw new Error("Expense not found");
-
-  return result.rows[0];
+const updateExpense = async (id: number, updateData: createExpenseDTO) => {
+  return await prisma.expenses.update({
+    where: { id: id },
+    data: {
+      title: updateData.title,
+      amount: updateData.amount,
+      type: updateData.type,
+      category: updateData.category,
+      note: updateData.note,
+    },
+  });
 };
 
 //==================================
 //delete expense
 //==================================
 
-const deleteExpense = async (id: string): Promise<Expense> => {
-  const query = "DELETE FROM expenses WHERE id = $1 RETURNING *";
-  const result = await pool.query(query, [id]);
-
-  if (result.rowCount === 0) throw new Error("Expense not found");
-
-  return result.rows[0];
+const deleteExpense = async (id: number) => {
+  return await prisma.expenses.delete({
+    where: { id: id },
+  });
 };
 
 const expenseModel = {

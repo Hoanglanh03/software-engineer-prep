@@ -48,7 +48,7 @@ const getUsers = async (req: Request, res: Response) => {
 const getUserById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const data = await userService.getUserById(String(id));
+    const data = await userService.getUserById(Number(id));
     if (!data) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -65,7 +65,7 @@ const getUserById = async (req: Request, res: Response) => {
 const updateUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updatedUser = await userService.updateUser(String(id), req.body);
+    const updatedUser = await userService.updateUser(Number(id), req.body);
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -82,7 +82,7 @@ const updateUser = async (req: Request, res: Response) => {
 const deleteUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const deleted = await userService.deleteUser(String(id));
+    const deleted = await userService.deleteUser(Number(id));
     if (!deleted) {
       return res.status(404).json({ error: "User not found" });
     }
