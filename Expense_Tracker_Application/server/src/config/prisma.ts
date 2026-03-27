@@ -4,14 +4,6 @@ import { Pool } from "pg";
 import dotenv from "dotenv";
 dotenv.config();
 
-// const prisma = new PrismaClient({
-//   adapter: new PrismaPg(
-//     new Pool({
-//       connectionString: process.env.DATABASE_URL,
-//     }) as any
-//   ),
-// });
-
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });

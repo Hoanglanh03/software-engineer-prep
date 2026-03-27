@@ -13,8 +13,6 @@ const createUser = async (newData: createUserDTO) => {
     throw new Error("User already exists");
   }
 
-  // Note: normally password would be hashed here, but since this is just a mockup
-  // or it relies on authService for actual registration, we'll just insert
   return await prisma.users.create({
     data: {
       user_name: newData.userName,

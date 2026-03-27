@@ -38,7 +38,6 @@ export const register = async (dataSignUp: createUserDTO): Promise<User> => {
       user_name: dataSignUp.userName,
       email: dataSignUp.email,
       password: hashedPassword,
-      // role mặc định sẽ lấy từ database nếu bạn đã set @default("user")
     },
   });
 

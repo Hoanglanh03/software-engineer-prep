@@ -42,8 +42,8 @@ export const signIn = async (req: Request, res: Response) => {
   }
 
   try {
-    const token = await login(validation.data);
-    return res.json({ token });
+    const result = await login(validation.data);
+    return res.json(result);
   } catch (error: any) {
     return res.status(401).json({
       status: "error",

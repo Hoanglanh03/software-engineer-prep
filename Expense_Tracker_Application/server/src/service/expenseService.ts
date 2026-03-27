@@ -25,7 +25,7 @@ const createExpense = async (newData: createExpenseDTO) => {
 const getAllExpense = async () => {
   return await prisma.expenses.findMany({
     include: {
-      users: true, // Nếu bạn muốn lấy luôn thông tin người tạo (JOIN)
+      users: true,
     },
     orderBy: {
       created_at: "desc",
@@ -37,7 +37,7 @@ const getExpenseById = async (id: number) => {
   return await prisma.expenses.findUnique({
     where: { id: id },
     include: {
-      users: true, // Nếu bạn muốn lấy luôn thông tin người tạo (JOIN)
+      users: true,
     },
   });
 };
